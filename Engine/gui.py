@@ -29,7 +29,7 @@ import copy
 
 import sys, pygame
 pygame.init()
-
+ 
 pygame.font.init()
 
 size = width, height = 500, 500
