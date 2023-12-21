@@ -27,6 +27,8 @@ import math
 
 import copy
 
+import arduinoCom
+
 import sys, pygame
 pygame.init()
  
@@ -97,20 +99,26 @@ while True:
                         for j in range(8):
                             if main.board[i][j] != None and main.board[i][j].type == "king" and main.board[i][j].color == teams[turn]: 
                                 king = [main.board[i][j].x, main.board[i][j].y]
+                    need2send2arduino = True
                     if king in findAllMoves(main.board, teams[abs(turn-1)]):
                         selected.x = OldSelected.x
                         selected.y = OldSelected.y
                         main.board[OldSelected.y][OldSelected.x] = selected
                         main.board[pos[1]][pos[0]] = OldSpace
                         turn = abs(turn-1)
+                        need2send2arduino = False
                     elif OldSelected.type == "rook" and OldSelected.y == abs((turn-1)*7): #castleing 
                             if OldSelected.x == 0 or OldSelected.x == 7: 
                                 if selected.x == (OldSelected.x/3.5)+3 and selected.y == OldSelected.y: 
                                     if main.board[abs((turn-1)*7)][4] != None and main.board[abs((turn-1)*7)][4].type == "king": 
-                                        main.board[abs((turn-1)*7)][4].x = abs(OldSelected.x-1)
+                                        arduinoCom.ArduinoCommunication(4, abs((turn-1)*7), int(((OldSelected.x*4)/7)+2), abs((turn-1)*7))
+                                        main.board[abs((turn-1)*7)][4].x = abs(OldSelected.x-1) #CHECK: DOES THIS MATCH REAL POS? SHOULD IT BE int(((OldSelected.x*4)/7)+2) ?
                                         main.board[abs((turn-1)*7)][4].y = (turn-1)*7 
                                         main.board[abs((turn-1)*7)][int(((OldSelected.x*4)/7)+2)] = main.board[abs((turn-1)*7)][4]
                                         main.board[abs((turn-1)*7)][4] = None
+                    if need2send2arduino == True:
+                        arduinoCom.ArduinoCommunication(OldSelected.x, OldSelected.y, pos[0], pos[1])
+                        print("")
                     turn = abs(turn-1)
                 DrawBoardAndPieces()
                 selected = None
